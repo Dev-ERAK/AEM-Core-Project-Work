@@ -1,9 +1,17 @@
 name: AEM Maven Build
-on: push
+
+on:
+  push:
+    branches: 
+      - main
+      - develop
+      - feature/action-wf-usecase
 
 jobs:
-  build:
+  # Job 1: Run only when commit is a PR merge
+  pr-merge:
     runs-on: ubuntu-latest
+    if: startsWith(github.event.head_commit.message, 'Merge pull request')
     steps:
       # Step 1: Checkout source code
       - name: Checkout code
@@ -25,3 +33,28 @@ jobs:
         with:
           name: aem-all-package
           path: all/target/*.zip
+
+      - name: Push to Cloud Repo
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git remote add mirror https://${{ secrets.MIRROR_USER }}:${{ secrets.MIRROR_PASS }}@git.example.com/ORG/SECONDARY-REPO.git
+
+          CURRENT_BRANCH=${GITHUB_REF_NAME}
+          echo "Pushing branch $CURRENT_BRANCH to mirror"
+          git push mirror $CURRENT_BRANCH --force
+
+  non-pr-merge:
+    runs-on: ubuntu-latest
+    if: ${{ !startsWith(github.event.head_commit.message, 'Merge pull request') }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 👉 Add your earlier steps here
+      - name: Branch Information
+        run: |
+            CURRENT_BRANCH=${GITHUB_REF_NAME}
+            echo "Pushing branch $CURRENT_BRANCH to mirror"
+            echo "Running workflow for normal pushes (not PR merges)"
