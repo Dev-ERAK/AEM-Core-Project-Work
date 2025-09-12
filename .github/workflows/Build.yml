@@ -16,3 +16,12 @@ jobs:
           distribution: temurin
           java-version: 21
           cache: maven
+
+      - name: Build AEM project
+        run: mvn clean install -PadobePublic
+
+      - name: Upload AEM package artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aem-all-package
+          path: all/target/*.zip
