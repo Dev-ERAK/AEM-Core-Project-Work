@@ -21,7 +21,7 @@ jobs:
         run: mvn clean install -PadobePublic
 
       - name: Upload AEM package artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: aem-all-package
           path: all/target/*.zip
